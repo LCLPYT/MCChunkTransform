@@ -1,32 +1,32 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "mcct",
   "version": "${version}",
 
-  "name": "Example mod",
-  "description": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr...",
+  "name": "MCChunkTransformer",
+  "description": "A simple Minecraft chunk transformer API",
   "authors": [
     "LCLP"
   ],
   "contact": {
-    "homepage": "https://github.com/LCLPYT/fabric-mod-boilerplate",
-    "sources": "https://github.com/LCLPYT/fabric-mod-boilerplate"
+    "homepage": "https://github.com/LCLPYT/MCChunkTransform",
+    "sources": "https://github.com/LCLPYT/MCChunkTransform"
   },
 
   "license": "MIT",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/mcct/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "org.example.modid.ExampleMod"
+      "work.lclpnet.mcct.MCChunkTransform"
     ],
     "client": [
-      "org.example.modid.client.ExampleModClient"
+      "work.lclpnet.mcct.client.MCChunkTransformClient"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "mcct.mixins.json"
   ],
 
   "depends": {

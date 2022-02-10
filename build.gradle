@@ -75,8 +75,8 @@ publishing {
             }
 
             pom {
-                name = 'Example mod'
-                description = 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr...'
+                name = 'MCChunkTransform'
+                description = 'A simple Minecraft chunk transformer API'
             }
         }
     }

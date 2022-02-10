@@ -1,11 +1,11 @@
-package org.example.modid;
+package work.lclpnet.mcct;
 
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
 
-public class ExampleMod implements ModInitializer {
+public class MCChunkTransform implements ModInitializer {
 
-    public static final String MOD_ID = "modid";
+    public static final String MOD_ID = "mcct";
 
     @Override
     public void onInitialize() {

@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "org.example.modid.asm.mixin",
+  "package": "work.lclpnet.mcct.asm.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [],
   "injectors": {
