@@ -160,14 +160,13 @@ public class WorldTransformer {
             chunkTag = NbtIo.read(chunkIn);
         }
 
-        transformChunkTag(chunkTag);
+        boolean dirty = MCCT.transformChunkNbt(chunkTag);
 
-        try (DataOutputStream chunkOut = regionFile.getChunkOutputStream(chunkPos)) {
-            NbtIo.write(chunkTag, chunkOut);
+        if (dirty) {
+            try (DataOutputStream chunkOut = regionFile.getChunkOutputStream(chunkPos)) {
+                NbtIo.write(chunkTag, chunkOut);
+            }
         }
-    }
-
-    protected void transformChunkTag(NbtCompound chunkTag) {
     }
 
     public static class RegionFileLocation {
