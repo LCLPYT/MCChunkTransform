@@ -11,7 +11,7 @@ In your singleplayer world selection screen, if you edit the world, you will fin
 ![Edit world screen](https://raw.githubusercontent.com/LCLPYT/MCChunkTransform/main/img/edit_world.jpg)
 
 Click this button to start the transformation process.
-By it's own this mod does not apply any modifications to your world; it only reads all chunks one by another.
+By it's own, this mod does not apply any modifications to your world; it only reads all chunks one by another.
 
 ![Transformation progress](https://github.com/LCLPYT/MCChunkTransform/raw/main/img/transform.jpg)
 
