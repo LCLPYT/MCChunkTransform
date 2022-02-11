@@ -17,14 +17,7 @@
   "icon": "assets/mcct/icon.png",
 
   "environment": "*",
-  "entrypoints": {
-    "main": [
-      "work.lclpnet.mcct.MCChunkTransform"
-    ],
-    "client": [
-      "work.lclpnet.mcct.client.MCChunkTransformClient"
-    ]
-  },
+  "entrypoints": {},
   "mixins": [
     "mcct.mixins.json"
   ],
