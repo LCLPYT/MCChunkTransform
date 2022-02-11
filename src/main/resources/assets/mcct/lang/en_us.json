@@ -1,0 +1,11 @@
+{
+  "mcct.screen.world_transform": "World Transformation",
+  "mcct.screen.world_transform.complete": "Transformation complete",
+  "mcct.screen.world_transform.complete.detail": "World transformed.",
+  "mcct.screen.world_transform.in_progress": "Transformation in progress%s",
+  "mcct.screen.world_transform.progress_short": "%.2f%% done",
+  "mcct.screen.world_transform.progress_long": "%s%% done (Dimension %s/%s)",
+  "mcct.button.transform_world": "Transform World",
+  "mcct.confirm.transform_world": "Apply transformations?",
+  "mcct.confirm.transform_world.desc": "Do you really want to apply MCChunkTransform transformation to this world?\nThis might corrupt your save. Make sure to create a backup first!"
+}
