@@ -21,10 +21,10 @@ public class ChunkTransformer {
     protected final Set<IChunkTransformation> transformations;
 
     protected ChunkTransformer(Predicate<RegistryKey<World>> dimensionTarget,
-                            Predicate<WorldTransformer.RegionFileLocation> regionTarget,
-                            BiPredicate<ChunkPos, WorldTransformer.RegionFileLocation> chunkTarget,
-                            Set<IChunkTransformation> transformations,
-                            @Nullable Runnable onComplete) {
+                               Predicate<WorldTransformer.RegionFileLocation> regionTarget,
+                               BiPredicate<ChunkPos, WorldTransformer.RegionFileLocation> chunkTarget,
+                               Set<IChunkTransformation> transformations,
+                               @Nullable Runnable onComplete) {
         this.dimensionTarget = Objects.requireNonNull(dimensionTarget);
         this.regionTarget = Objects.requireNonNull(regionTarget);
         this.chunkTarget = Objects.requireNonNull(chunkTarget);
@@ -45,7 +45,7 @@ public class ChunkTransformer {
     }
 
     public void applyTransformations(ChunkTransformContext ctx) {
-        transformations.forEach(transformation -> transformation.transform(ctx));
+        transformations.forEach(transformation -> transformation.transform(ctx, this));
     }
 
     public void complete() {
@@ -56,7 +56,7 @@ public class ChunkTransformer {
         private Predicate<RegistryKey<World>> dimensionTarget = dimension -> true;
         private Predicate<WorldTransformer.RegionFileLocation> regionTarget = region -> true;
         private BiPredicate<ChunkPos, WorldTransformer.RegionFileLocation> chunkTarget = (chunk, region) -> true;
-        private Set<IChunkTransformation> transformations = new HashSet<>();
+        private final Set<IChunkTransformation> transformations = new HashSet<>();
         private Runnable onComplete = null;
 
         public Builder targetDimensions(Predicate<RegistryKey<World>> dimensionTarget) {
