@@ -15,8 +15,8 @@ By it's own, this mod does not apply any modifications to your world; it only re
 
 ![Transformation progress](https://github.com/LCLPYT/MCChunkTransform/raw/main/img/transform.jpg)
 
-## Create custom transformations
-In order to apply custom transformation to your world, you need to implement a `IChunkTransformer` in your mod.
+## Create custom transformers
+In order to apply custom transformation to your world, you need to register a `ChunkTransformer` in your mod.
 If you have no mod yet, you can create one as described in the [Fabric wiki](https://fabricmc.net/wiki/tutorial:introduction).
 
 ### Gradle dependency
@@ -43,15 +43,39 @@ In your ModInitializer or ClientInitializer, register a new transformer by calli
 public class ExampleMod implements ModInitializer {
     @Override
     public void onInitialize() {
-        MCCT.registerTransformer(ctx -> {
+        MCCT.registerTransformer(new ChunkTransformer.Builder().addTransformation(ctx -> {
             CompoundTag chunkData = ctx.getCompound();
             // read and write chunkData here...
             // if you modified the data, remember to call ctx.markDirty() so that your changes get written to disk.
-        });
+        }).create());
     }
 }
 ```
-The transformer will be called for every chunk in your world, including other dimensions.
+You can use the `ChunkTransformer.Builder` to configure your chunk transformer.
+For the sake of simplicity, we only register a single chunk transformation with no further configuration.
+However, you can add multiple transformers by chaining the `addTransformation()` calls.
+The transformations will be applied in the order, they have been submitted to the builder.
+
+By default, every transformation is called once for every chunk of every region of every dimension.
+However, you can also configure your `ChunkTransformer` to filter dimensions `targetDimensions()`, regions `targetRegions()` and chunks `targetChunks()`:
+```java
+public class ExampleMod implements ModInitializer {
+    @Override
+    public void onInitialize() {
+        MCCT.registerTransformer(new ChunkTransformer.Builder()
+                .addTransformation(ctx -> {
+                    CompoundTag chunkData = ctx.getCompound();
+                    // read and write chunkData here...
+                    // if you modified the data, remember to call ctx.markDirty() so that your changes get written to disk.
+                })
+                .targetDimension(World.OVERWORLD::equals)
+                .targetRegions(region -> Math.abs(region.x) < 2 && Math.abs(region.y) < 2)
+                .targetChunks((chunkPos, region) -> chunkPos.x % 2 == 0 && chunkPos.z % 2 == 0)
+                .create());
+    }
+}
+```
+This transformer in this example only targets chunks with even coordinates, located in one of the region files `[r.[-1,0,1].[-1,0,1].mca` of the overworld.
 
 ### Example
 The following example transformer will replace every diamond block in a world with a gold block.
@@ -59,46 +83,35 @@ The following example transformer will replace every diamond block in a world wi
 public class ExampleMod implements ModInitializer {
     @Override
     public void onInitialize() {
-        MCCT.registerTransformer(ctx -> {
+        MCCT.registerTransformer(new ChunkTransformer.Builder().addTransformation(ctx -> {
             CompoundTag chunkData = ctx.getCompound();
-            
-            // check if the root compound tag has a "Level" entry of type compound
             if (!chunkData.contains("Level", NbtType.COMPOUND)) return;
+
             CompoundTag level = chunkData.getCompound("Level");
-            
-            // check if the compound tag has a "Sections" entry of type list
             if (!level.contains("Sections", NbtType.LIST)) return;
-            ListTag sections = level.getList("Sections", NbtType.COMPOUND);  // get a ListTag that stores CompoundTags
-            
-            // iterate sections
+
+            ListTag sections = level.getList("Sections", NbtType.COMPOUND);
             sections.forEach(sectionTag -> {
                 if (!(sectionTag instanceof CompoundTag)) return;
+
                 CompoundTag section = (CompoundTag) sectionTag;
-                
-                // check if the compound tag has a "Palette" entry of type list
                 if (!section.contains("Palette", NbtType.LIST)) return;
+
                 ListTag palette = section.getList("Palette", NbtType.COMPOUND);
-                
-                // iterate block palette entries
                 palette.forEach(paletteEntryTag -> {
                     if (!(paletteEntryTag instanceof CompoundTag)) return;
+
                     CompoundTag paletteEntry = (CompoundTag) paletteEntryTag;
-                    
-                    // check if the compound tag has a "Name" entry of type string
                     if (!paletteEntry.contains("Name", NbtType.STRING)) return;
 
-                    // get the block identifier (e.g. "minecraft:dirt")
                     String blockId = paletteEntry.getString("Name");
                     if (!"minecraft:diamond_block".equals(blockId)) return;
-                    
-                    // the palette entry is a diamond block, replace this with gold block:
+
                     paletteEntry.putString("Name", "minecraft:gold_block");
-                    
-                    // mark dirty to indicate that this chunk should be written to disk
                     ctx.markDirty();
                 });
             });
-        });
+        }).create());
     }
 }
 ```
