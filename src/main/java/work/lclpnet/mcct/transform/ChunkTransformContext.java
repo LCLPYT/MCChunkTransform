@@ -1,16 +1,21 @@
 package work.lclpnet.mcct.transform;
 
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.ChunkPos;
 
 import java.util.Objects;
 
 public class ChunkTransformContext {
 
     private NbtCompound compound;
+    public final ChunkPos chunkPos;
+    public final WorldTransformer.RegionFileLocation region;
     private boolean dirty = false;
 
-    ChunkTransformContext(NbtCompound compound) {
+    ChunkTransformContext(NbtCompound compound, ChunkPos chunkPos, WorldTransformer.RegionFileLocation region) {
         this.compound = Objects.requireNonNull(compound);
+        this.chunkPos = chunkPos;
+        this.region = region;
     }
 
     /**

@@ -1,6 +1,6 @@
 package work.lclpnet.mcct.transform;
 
-public interface IChunkTransformer {
+public interface IChunkTransformation {
 
     void transform(ChunkTransformContext ctx);
 }

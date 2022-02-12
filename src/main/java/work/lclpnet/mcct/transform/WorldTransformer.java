@@ -25,25 +25,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class WorldTransformer {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Pattern REGION_FILE_PATTERN = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
 
-    protected final LevelInfo levelInfo;
-    protected final LevelStorage.Session session;
+    public final LevelInfo levelInfo;
+    public final LevelStorage.Session session;
     protected final ImmutableSet<RegistryKey<World>> worlds;
     protected final ProgressListener progressListener;
+    protected final AtomicBoolean running = new AtomicBoolean(false);
+    protected ILevelTransformerManager transformer = null;
 
     protected WorldTransformer(LevelStorage.Session session, LevelInfo levelInfo, ImmutableSet<RegistryKey<World>> worlds, ProgressListener progressListener) {
         this.session = Objects.requireNonNull(session);
         this.levelInfo = Objects.requireNonNull(levelInfo);
         this.worlds = Objects.requireNonNull(worlds);
         this.progressListener = Objects.requireNonNull(progressListener);
-        this.progressListener.setSteps(worlds.size());
     }
 
     public static CompletableFuture<WorldTransformer> create(MinecraftClient client, LevelStorage.Session storageSession, ProgressListener progressListener) {
@@ -75,22 +78,46 @@ public class WorldTransformer {
         }
     }
 
+    public boolean isRunning() {
+        return running.get();
+    }
+
     public CompletableFuture<Void> transform() {
         return CompletableFuture.runAsync(this::transformSync);
     }
 
     protected void transformSync() {
+        if (running.get()) throw new IllegalStateException("Transform is already running");
+        running.set(true);
+
+        transformer = MCCT.createTransformer(this);
+
         final ImmutableList<RegistryKey<World>> list = this.worlds.asList();
 
-        final int dimCount = worlds.size();
-        LOGGER.info("Found {} dimensions", dimCount);
+        final int unfilteredDimCount = worlds.size();
+        LOGGER.info("Found {} dimensions", unfilteredDimCount);
+
+        final List<RegistryKey<World>> transformDimensions = list.stream()
+                .filter(transformer::shouldTransformDimension)
+                .collect(Collectors.toList());
+
+        final int dimCount = transformDimensions.size();
+        final int ignoredDimensions = unfilteredDimCount - dimCount;
+        if (ignoredDimensions > 0) LOGGER.info("Ignoring {} dimensions", ignoredDimensions);
+
+        this.progressListener.setSteps(dimCount);
 
         for (int i = 0; i < dimCount; i++) {
             this.progressListener.updateCurrentStep(i + 1);
             this.transformWorld(list.get(i));
         }
 
+        transformer.complete();
+        transformer = null;
+
         LOGGER.info("Transformation complete.");
+
+        running.set(false);
     }
 
     protected void transformWorld(RegistryKey<World> world) {
@@ -113,7 +140,9 @@ public class WorldTransformer {
             int regionX = Integer.parseInt(matcher.group(1)) << 5;
             int regionY = Integer.parseInt(matcher.group(2)) << 5;
 
-            regionFiles.add(new RegionFileLocation(regionFile, regionX, regionY));
+            final RegionFileLocation location = new RegionFileLocation(regionFile, regionX, regionY, world);
+            if (transformer.shouldTransformRegion(location))
+                regionFiles.add(location);
         }
 
         final int regionFileCount = regionFiles.size();
@@ -138,18 +167,18 @@ public class WorldTransformer {
                 for (int y = 0; y < 32; ++y) {
                     ChunkPos chunkPos = new ChunkPos(x + region.x, y + region.y);
 
-                    if (regionFile.isChunkValid(chunkPos))
+                    if (regionFile.isChunkValid(chunkPos) && transformer.shouldTransformChunk(chunkPos, region))
                         chunkPositions.add(chunkPos);
                 }
             }
 
             for (ChunkPos chunkPosition : chunkPositions) {
-                transformChunk(regionFile, chunkPosition);
+                transformChunk(regionFile, chunkPosition, region);
             }
         } catch (Throwable ignored) {}
     }
 
-    protected void transformChunk(RegionFile regionFile, ChunkPos chunkPos) throws IOException {
+    protected void transformChunk(RegionFile regionFile, ChunkPos chunkPos, RegionFileLocation region) throws IOException {
         NbtCompound chunkTag;
         try (DataInputStream chunkIn = regionFile.getChunkInputStream(chunkPos)) {
             if (chunkIn == null) {
@@ -160,7 +189,7 @@ public class WorldTransformer {
             chunkTag = NbtIo.read(chunkIn);
         }
 
-        boolean dirty = MCCT.transformChunkNbt(chunkTag);
+        boolean dirty = transformer.transformChunk(chunkTag, chunkPos, region);
 
         if (dirty) {
             try (DataOutputStream chunkOut = regionFile.getChunkOutputStream(chunkPos)) {
@@ -172,11 +201,13 @@ public class WorldTransformer {
     public static class RegionFileLocation {
         public final File file;
         public final int x, y;
+        public final RegistryKey<World> world;
 
-        public RegionFileLocation(File file, int x, int y) {
+        public RegionFileLocation(File file, int x, int y, RegistryKey<World> world) {
             this.file = file;
             this.x = x;
             this.y = y;
+            this.world = world;
         }
     }
 
