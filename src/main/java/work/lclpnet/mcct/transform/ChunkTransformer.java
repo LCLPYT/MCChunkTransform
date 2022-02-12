@@ -59,7 +59,7 @@ public class ChunkTransformer {
         private Set<IChunkTransformation> transformations = new HashSet<>();
         private Runnable onComplete = null;
 
-        public Builder targetDimension(Predicate<RegistryKey<World>> dimensionTarget) {
+        public Builder targetDimensions(Predicate<RegistryKey<World>> dimensionTarget) {
             this.dimensionTarget = Objects.requireNonNull(dimensionTarget);
             return this;
         }
