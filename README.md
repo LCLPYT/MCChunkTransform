@@ -43,7 +43,7 @@ In your ModInitializer or ClientInitializer, register a new transformer by calli
 public class ExampleMod implements ModInitializer {
     @Override
     public void onInitialize() {
-        MCCT.registerTransformer(new ChunkTransformer.Builder().addTransformation(ctx -> {
+        MCCT.registerTransformer(new ChunkTransformer.Builder().addTransformation((ctx, transformer) -> {
             CompoundTag chunkData = ctx.getCompound();
             // read and write chunkData here...
             // if you modified the data, remember to call ctx.markDirty() so that your changes get written to disk.
@@ -63,7 +63,7 @@ public class ExampleMod implements ModInitializer {
     @Override
     public void onInitialize() {
         MCCT.registerTransformer(new ChunkTransformer.Builder()
-                .addTransformation(ctx -> {
+                .addTransformation((ctx, transformer) -> {
                     CompoundTag chunkData = ctx.getCompound();
                     // read and write chunkData here...
                     // if you modified the data, remember to call ctx.markDirty() so that your changes get written to disk.
@@ -83,7 +83,7 @@ The following example transformer will replace every diamond block in a world wi
 public class ExampleMod implements ModInitializer {
     @Override
     public void onInitialize() {
-        MCCT.registerTransformer(new ChunkTransformer.Builder().addTransformation(ctx -> {
+        MCCT.registerTransformer(new ChunkTransformer.Builder().addTransformation((ctx, transformer) -> {
             CompoundTag chunkData = ctx.getCompound();
             if (!chunkData.contains("Level", NbtType.COMPOUND)) return;
 
