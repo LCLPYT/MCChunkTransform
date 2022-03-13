@@ -51,7 +51,7 @@ public class WorldTransformScreen extends Screen implements WorldTransformer.Pro
         if (aBoolean.get()) {
             final LevelSummary levelSummary = session.getLevelSummary();
             displayToast(new TranslatableText("mcct.screen.world_transform.complete"), new TranslatableText("mcct.screen.world_transform.complete.detail"));
-            Objects.requireNonNull(this.client).openScreen(parent);
+            Objects.requireNonNull(this.client).setScreen(parent);
         }
     }
 

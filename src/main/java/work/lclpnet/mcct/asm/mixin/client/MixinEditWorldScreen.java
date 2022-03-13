@@ -26,15 +26,15 @@ public class MixinEditWorldScreen {
     public void afterInit(CallbackInfo ci) {
         EditWorldScreen screen = (EditWorldScreen) (Object) this;
 
-        final ButtonWidget.PressAction onPress = button -> MinecraftClient.getInstance().openScreen(new ConfirmScreen(confirmed -> {
+        final ButtonWidget.PressAction onPress = button -> MinecraftClient.getInstance().setScreen(new ConfirmScreen(confirmed -> {
             MinecraftClient client = MinecraftClient.getInstance();
-            if (confirmed) client.openScreen(new WorldTransformScreen(screen, storageSession));
-            else client.openScreen(screen);
+            if (confirmed) client.setScreen(new WorldTransformScreen(screen, storageSession));
+            else client.setScreen(screen);
         }, new TranslatableText("mcct.confirm.transform_world"), new TranslatableText("mcct.confirm.transform_world.desc")));
 
         final ButtonWidget transformBtn = new ButtonWidget(screen.width / 2 - 100 + 200 + 4, screen.height / 4 + 96 + 5, 120, 20,
                 new TranslatableText("mcct.button.transform_world"), onPress);
 
-        ((ScreenAccessor) this).invokeAddButton(transformBtn);
+        ((ScreenAccessor) this).invokeAddDrawableChild(transformBtn);
     }
 }

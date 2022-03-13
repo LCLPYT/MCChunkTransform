@@ -21,6 +21,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,7 +29,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class WorldTransformer {
 
@@ -57,7 +57,7 @@ public class WorldTransformer {
         DynamicRegistryManager.Impl impl = DynamicRegistryManager.create();
 
         try {
-            MinecraftClient.IntegratedResourceManager integratedResourceManager = client.method_29604(impl, MinecraftClient::method_29598, MinecraftClient::createSaveProperties, false, storageSession);
+            MinecraftClient.IntegratedResourceManager integratedResourceManager = client.createIntegratedResourceManager(impl, MinecraftClient::loadDataPackSettings, MinecraftClient::createSaveProperties, false, storageSession);
 
             WorldTransformer transformer;
             try {
@@ -98,8 +98,7 @@ public class WorldTransformer {
         LOGGER.info("Found {} dimensions", unfilteredDimCount);
 
         final List<RegistryKey<World>> transformDimensions = list.stream()
-                .filter(transformer::shouldTransformDimension)
-                .collect(Collectors.toList());
+                .filter(transformer::shouldTransformDimension).toList();
 
         final int dimCount = transformDimensions.size();
         final int ignoredDimensions = unfilteredDimCount - dimCount;
@@ -123,8 +122,9 @@ public class WorldTransformer {
     protected void transformWorld(RegistryKey<World> world) {
         LOGGER.info("Transforming world {}...", world.getValue());
 
-        File worldDirectory = this.session.getWorldDirectory(world);
-        File regionDirectory = new File(worldDirectory, "region");
+        Path worldPath = this.session.getWorldDirectory(world);
+        Path regionPath = worldPath.resolve("region");
+        final File regionDirectory = regionPath.toFile();
         File[] files = regionDirectory.listFiles((filex, string) -> string.endsWith(".mca"));
         if (files == null) {
             LOGGER.info("No region files found in {}", regionDirectory.getAbsolutePath());
@@ -140,7 +140,7 @@ public class WorldTransformer {
             int regionX = Integer.parseInt(matcher.group(1)) << 5;
             int regionY = Integer.parseInt(matcher.group(2)) << 5;
 
-            final RegionFileLocation location = new RegionFileLocation(regionFile, regionX, regionY, world);
+            final RegionFileLocation location = new RegionFileLocation(regionPath, regionX, regionY, world);
             if (transformer.shouldTransformRegion(location))
                 regionFiles.add(location);
         }
@@ -150,15 +150,15 @@ public class WorldTransformer {
 
         for (int i = 0; i < regionFileCount; i++) {
             RegionFileLocation regionFile = regionFiles.get(i);
-            transformRegionFile(regionFile, regionDirectory);
+            transformRegionFile(regionFile, regionPath);
             this.progressListener.updateProgress((i + 1) / (float) regionFileCount);
         }
 
         LOGGER.info("World {} transformed successfully.", world.getValue());
     }
 
-    protected void transformRegionFile(RegionFileLocation region, File regDirectory) {
-        LOGGER.info("Transforming region file {}...", region.file.getName());
+    protected void transformRegionFile(RegionFileLocation region, Path regDirectory) {
+        LOGGER.info("Transforming region file {}...", region.file.getFileName());
 
         try (RegionFile regionFile = new RegionFile(region.file, regDirectory, true)) {
             List<ChunkPos> chunkPositions = Lists.newArrayList();
@@ -198,18 +198,7 @@ public class WorldTransformer {
         }
     }
 
-    public static class RegionFileLocation {
-        public final File file;
-        public final int x, y;
-        public final RegistryKey<World> world;
-
-        public RegionFileLocation(File file, int x, int y, RegistryKey<World> world) {
-            this.file = file;
-            this.x = x;
-            this.y = y;
-            this.world = world;
-        }
-    }
+    public record RegionFileLocation(Path file, int x, int y, RegistryKey<World> world) {}
 
     public interface ProgressListener {
         void setSteps(int steps);
