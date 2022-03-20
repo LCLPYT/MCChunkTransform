@@ -140,7 +140,7 @@ public class WorldTransformer {
             int regionX = Integer.parseInt(matcher.group(1)) << 5;
             int regionY = Integer.parseInt(matcher.group(2)) << 5;
 
-            final RegionFileLocation location = new RegionFileLocation(regionPath, regionX, regionY, world);
+            final RegionFileLocation location = new RegionFileLocation(regionFile.toPath(), regionX, regionY, world);
             if (transformer.shouldTransformRegion(location))
                 regionFiles.add(location);
         }
@@ -175,7 +175,9 @@ public class WorldTransformer {
             for (ChunkPos chunkPosition : chunkPositions) {
                 transformChunk(regionFile, chunkPosition, region);
             }
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+            LOGGER.warn("Could not read {} as region file", region.file.getFileName());
+        }
     }
 
     protected void transformChunk(RegionFile regionFile, ChunkPos chunkPos, RegionFileLocation region) throws IOException {
