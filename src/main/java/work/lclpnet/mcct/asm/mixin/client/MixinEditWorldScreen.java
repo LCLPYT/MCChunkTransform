@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import work.lclpnet.mcct.asm.type.client.IScreen;
 import work.lclpnet.mcct.client.gui.WorldTransformScreen;
 
 @Mixin(EditWorldScreen.class)
@@ -35,6 +36,6 @@ public class MixinEditWorldScreen {
         final ButtonWidget transformBtn = new ButtonWidget(screen.width / 2 - 100 + 200 + 4, screen.height / 4 + 96 + 5, 120, 20,
                 new TranslatableText("mcct.button.transform_world"), onPress);
 
-        ((ScreenAccessor) this).invokeAddDrawableChild(transformBtn);
+        ((IScreen) this).mcct$addDrawableChild(transformBtn);
     }
 }
