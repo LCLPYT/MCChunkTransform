@@ -54,7 +54,7 @@ public class ExampleMod implements ModInitializer {
 You can use the `ChunkTransformer.Builder` to configure your chunk transformer.
 For the sake of simplicity, we only register a single chunk transformation with no further configuration.
 However, you can add multiple transformers by chaining the `addTransformation()` calls.
-The transformations will be applied in the order, they have been submitted to the builder.
+The transformations will be applied in the order they have been submitted to the builder.
 
 By default, every transformation is called once for every chunk of every region of every dimension.
 However, you can also configure your `ChunkTransformer` to filter dimensions `targetDimensions()`, regions `targetRegions()` and chunks `targetChunks()`:
