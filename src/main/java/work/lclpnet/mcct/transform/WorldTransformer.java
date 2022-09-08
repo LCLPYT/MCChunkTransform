@@ -6,8 +6,8 @@ import com.google.common.collect.Lists;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.server.SaveLoader;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.SaveProperties;
 import net.minecraft.world.World;
@@ -54,24 +54,13 @@ public class WorldTransformer {
     }
 
     protected static WorldTransformer createSync(MinecraftClient client, LevelStorage.Session storageSession, ProgressListener progressListener) {
-        DynamicRegistryManager.Impl impl = DynamicRegistryManager.create();
+        try (SaveLoader saveLoader = client.createSaveLoader(storageSession, false)) {
 
-        try {
-            MinecraftClient.IntegratedResourceManager integratedResourceManager = client.createIntegratedResourceManager(impl, MinecraftClient::loadDataPackSettings, MinecraftClient::createSaveProperties, false, storageSession);
+            SaveProperties saveProperties = saveLoader.saveProperties();
+            storageSession.backupLevelDataFile(saveLoader.dynamicRegistryManager(), saveProperties);
+            var immutableSet = saveProperties.getGeneratorOptions().getWorlds();
 
-            WorldTransformer transformer;
-            try {
-                SaveProperties saveProperties = integratedResourceManager.getSaveProperties();
-                storageSession.backupLevelDataFile(impl, saveProperties);
-                ImmutableSet<RegistryKey<World>> immutableSet = saveProperties.getGeneratorOptions().getWorlds();
-                transformer = new WorldTransformer(storageSession, saveProperties.getLevelInfo(), immutableSet, progressListener);
-            } finally {
-                if (integratedResourceManager != null) {
-                    integratedResourceManager.close();
-                }
-            }
-
-            return transformer;
+            return new WorldTransformer(storageSession, saveProperties.getLevelInfo(), immutableSet, progressListener);
         } catch (Exception e) {
             LOGGER.warn("Failed to load datapacks, can't optimize world", e);
             return null;

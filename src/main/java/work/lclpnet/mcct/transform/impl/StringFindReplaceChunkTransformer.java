@@ -22,14 +22,14 @@ public class StringFindReplaceChunkTransformer implements IChunkTransformation {
 
     /**
      * Create a new find and replace transformer.
-     * This transformer will find any strings and replaces <code>searchString</code> with <code>replaceValue</code>.
+     * This transformer will find any strings and replaces <code>target</code> with <code>replacement</code>.
      *
-     * @param searchString The string to search; will be replaced with <code>replaceValue</code>.
-     * @param replaceValue The string that will be inserted.
+     * @param target The string to search; will be replaced with <code>replacement</code>.
+     * @param replacement The string that will be inserted.
      */
-    public StringFindReplaceChunkTransformer(String searchString, String replaceValue) {
-        this.searchString = Objects.requireNonNull(searchString);
-        this.replaceValue = Objects.requireNonNull(replaceValue);
+    public StringFindReplaceChunkTransformer(String target, String replacement) {
+        this.searchString = Objects.requireNonNull(target);
+        this.replaceValue = Objects.requireNonNull(replacement);
     }
 
     @Override
@@ -56,10 +56,18 @@ public class StringFindReplaceChunkTransformer implements IChunkTransformation {
 
 
     protected void visitString(String string, NbtCompound parent, String key, ChunkTransformContext ctx) {
-        if (!string.contains(searchString)) return;
+        if (!shouldReplace(string)) return;
 
-        String val = string.replace(searchString, replaceValue);
+        String val = replace(string);
         parent.putString(key, val);
         ctx.markDirty();
+    }
+
+    protected boolean shouldReplace(String s) {
+        return s != null && s.contains(searchString);
+    }
+
+    protected String replace(String s) {
+        return s.replace(searchString, replaceValue);
     }
 }
