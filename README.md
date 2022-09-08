@@ -4,8 +4,8 @@
 A simple Minecraft chunk transformer API.
 
 ## What it does
-MCChunkTransform as a simple Fabric client modification for applying transformations to your Minecraft worlds programmatically.
-Though the mod is written for Fabric, it can also transform worlds created in Forge, without making them incompatible.
+MCChunkTransform is a simple Fabric client modification for applying transformations to your Minecraft worlds programmatically.
+Though the mod is written for Fabric, it can also transform worlds created in Forge or Vanilla, without making them incompatible.
 
 In your singleplayer world selection screen, if you edit the world, you will find a new button:
 ![Edit world screen](https://raw.githubusercontent.com/LCLPYT/MCChunkTransform/main/img/edit_world.jpg)
@@ -54,7 +54,7 @@ public class ExampleMod implements ModInitializer {
 You can use the `ChunkTransformer.Builder` to configure your chunk transformer.
 For the sake of simplicity, we only register a single chunk transformation with no further configuration.
 However, you can add multiple transformers by chaining the `addTransformation()` calls.
-The transformations will be applied in the order, they have been submitted to the builder.
+The transformations will be applied in the order they have been submitted to the builder.
 
 By default, every transformation is called once for every chunk of every region of every dimension.
 However, you can also configure your `ChunkTransformer` to filter dimensions `targetDimensions()`, regions `targetRegions()` and chunks `targetChunks()`:
