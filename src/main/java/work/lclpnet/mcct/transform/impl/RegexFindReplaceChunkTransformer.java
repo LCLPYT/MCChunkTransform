@@ -6,7 +6,7 @@ public class RegexFindReplaceChunkTransformer extends StringFindReplaceChunkTran
      * Create a new find and replace transformer supporting regex.
      * This transformer will find any strings matching <code>pattern</code>
      * and replaces all matches with <code>replacement</code>.
-     *
+     * <p>
      * Supports substituting groups with <code>$n</code> identifiers, where <code>n</code> is the match group.
      * Uses the {@link String#replaceAll(String, String)} method.
      *

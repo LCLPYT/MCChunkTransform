@@ -4,7 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.world.EditWorldScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,10 +31,10 @@ public class MixinEditWorldScreen {
             MinecraftClient client = MinecraftClient.getInstance();
             if (confirmed) client.setScreen(new WorldTransformScreen(screen, storageSession));
             else client.setScreen(screen);
-        }, new TranslatableText("mcct.confirm.transform_world"), new TranslatableText("mcct.confirm.transform_world.desc")));
+        }, Text.translatable("mcct.confirm.transform_world"), Text.translatable("mcct.confirm.transform_world.desc")));
 
         final ButtonWidget transformBtn = new ButtonWidget(screen.width / 2 - 100 + 200 + 4, screen.height / 4 + 96 + 5, 120, 20,
-                new TranslatableText("mcct.button.transform_world"), onPress);
+                Text.translatable("mcct.button.transform_world"), onPress);
 
         ((IScreen) this).mcct$addDrawableChild(transformBtn);
     }

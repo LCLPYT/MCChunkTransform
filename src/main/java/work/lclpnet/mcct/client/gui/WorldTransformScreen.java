@@ -8,7 +8,6 @@ import net.minecraft.client.toast.ToastManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.level.storage.LevelSummary;
 import work.lclpnet.mcct.transform.WorldTransformer;
@@ -28,7 +27,7 @@ public class WorldTransformScreen extends Screen implements WorldTransformer.Pro
     protected int percentHash = 0;
 
     public WorldTransformScreen(EditWorldScreen parent, LevelStorage.Session session) {
-        super(new TranslatableText("mcct.screen.world_transform"));
+        super(Text.translatable("mcct.screen.world_transform"));
         this.session = Objects.requireNonNull(session);
         this.parent = Objects.requireNonNull(parent);
     }
@@ -50,7 +49,7 @@ public class WorldTransformScreen extends Screen implements WorldTransformer.Pro
         super.tick();
         if (aBoolean.get()) {
             final LevelSummary levelSummary = session.getLevelSummary();
-            displayToast(new TranslatableText("mcct.screen.world_transform.complete"), new TranslatableText("mcct.screen.world_transform.complete.detail"));
+            displayToast(Text.translatable("mcct.screen.world_transform.complete"), Text.translatable("mcct.screen.world_transform.complete.detail"));
             Objects.requireNonNull(this.client).setScreen(parent);
         }
     }
@@ -105,14 +104,14 @@ public class WorldTransformScreen extends Screen implements WorldTransformer.Pro
         final StringBuilder builder = new StringBuilder();
         for (int i = 0; i < dots; i++) builder.append('.');
 
-        return new TranslatableText("mcct.screen.world_transform.in_progress", builder.toString());
+        return Text.translatable("mcct.screen.world_transform.in_progress", builder.toString());
     }
 
     protected Text getProgressText() {
         final String percent = String.format("%.2f", percentHash / 10e+2F);
         return steps > 0
-                ? new TranslatableText("mcct.screen.world_transform.progress_long", percent, currentStep, steps)
-                : new TranslatableText("mcct.screen.world_transform.progress_short", percent);
+                ? Text.translatable("mcct.screen.world_transform.progress_long", percent, currentStep, steps)
+                : Text.translatable("mcct.screen.world_transform.progress_short", percent);
     }
 
     @Override

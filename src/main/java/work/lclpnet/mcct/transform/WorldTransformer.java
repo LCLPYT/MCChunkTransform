@@ -54,7 +54,7 @@ public class WorldTransformer {
     }
 
     protected static WorldTransformer createSync(MinecraftClient client, LevelStorage.Session storageSession, ProgressListener progressListener) {
-        try (SaveLoader saveLoader = client.createSaveLoader(storageSession, false)) {
+        try (SaveLoader saveLoader = client.createIntegratedServerLoader().createSaveLoader(storageSession, false)) {
 
             SaveProperties saveProperties = saveLoader.saveProperties();
             storageSession.backupLevelDataFile(saveLoader.dynamicRegistryManager(), saveProperties);
